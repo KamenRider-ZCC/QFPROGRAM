@@ -9,7 +9,7 @@
         <kerwin-search bindevent="handleEvent"></kerwin-search>
     </view>
 </mp-sticky>
-<view wx:for="{{goodlist}}" wx:key="index" class="goodbox">
+<view wx:for="{{goodlist}}" wx:key="index" class="goodbox" bindtap="handleChangePage" data-id="{{item.id}}" data-name="{{item.title}}">
     <image src="http://localhost:5000{{item.poster}}" mode="widthFix"></image>
     <view>
         <view>{{item.title}}</view>

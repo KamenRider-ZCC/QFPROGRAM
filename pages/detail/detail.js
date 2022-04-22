@@ -1,50 +1,58 @@
 import request from "../../util/request"
 
-// pages/home/home.js
+// pages/detail/detail.js
 Page({
 
     /**
      * 页面的初始数据
      */
     data: {
-        looplist: [],
-        goodlist: []
+        info: null,
+        current: 0,
+        commentList: []
     },
-    current: 1,
-    total: 0,
+
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad: function (options) {
-
+        wx.setNavigationBarTitle({
+            title: options.name
+        })
+        this.getDetailInfo(options.id)
+        this.getCommentInfo(options.id)
     },
-
+    getCommentInfo(id) {
+        request({
+            url: `/comments`
+        }).then(res => {
+            this.setData({
+                commentList: res
+            })
+        })
+    },
+    getDetailInfo(id) {
+        request({
+            url: `/goods/${id}`
+        }).then(res => {
+            this.setData({
+                info: res
+            })
+        })
+    },
+    handleTap(evt) {
+        wx.previewImage({
+            urls: this.data.info.slides.map(item => `http://localhost:5000${item}`),
+            current: evt.currentTarget.dataset.current
+        })
+    },
     /**
      * 生命周期函数--监听页面初次渲染完成
      */
     onReady: function () {
-        this.renderSwiper()
-        this.renderGoods()
+
     },
-    renderGoods() {
-        request({
-            url: `/goods?_page=${this.current}&_limit=5`
-        }, true).then(res => {
-            this.total = Number(res.total)
-            this.setData({
-                goodlist: [...this.data.goodlist, ...res.list]
-            })
-        })
-    },
-    renderSwiper() {
-        request({
-            url: '/recommends'
-        }).then(res => {
-            this.setData({
-                looplist: res
-            })
-        })
-    },
+
     /**
      * 生命周期函数--监听页面显示
      */
@@ -70,20 +78,14 @@ Page({
      * 页面相关事件处理函数--监听用户下拉动作
      */
     onPullDownRefresh: function () {
-        setTimeout(() => {
-            wx.stopPullDownRefresh()
-        }, 1000)
+
     },
 
     /**
      * 页面上拉触底事件的处理函数
      */
     onReachBottom: function () {
-        if (this.data.goodlist.length === this.total) {
-            return
-        }
-        this.current++
-        this.renderGoods()
+
     },
 
     /**
@@ -92,10 +94,9 @@ Page({
     onShareAppMessage: function () {
 
     },
-    handleEvent() { },
-    handleChangePage(evt) {
-        wx.navigateTo({
-            url: `/pages/detail/detail?id=${evt.currentTarget.dataset.id}&name=${evt.currentTarget.dataset.name}`,
+    handleActive(evt) {
+        this.setData({
+            current: evt.currentTarget.dataset.index
         })
     }
 })
